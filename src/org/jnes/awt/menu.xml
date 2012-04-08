@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menubar>
+	<menu caption="$file">
+		<item caption="$file-quit">
+			<action method="onFileQuit"/>
+		</item>
+	</menu>
+	<menu caption="$emu">
+		<item caption="$emu-reset">
+			<action method="reset"/>
+		</item>
+		<item caption="$emu-pause">
+			<action method="pause"/>
+		</item>
+		<item caption="Tiles viewer...">
+			<action method="showTilesViewer"/>
+		</item>
+		<item caption="Map viewer...">
+			<action method="showMapViewer"/>
+		</item>
+	</menu>
+</menubar>
