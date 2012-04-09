@@ -22,7 +22,7 @@ import org.jnes.NESSystemImpl;
 import org.jnes.RomName;
 import org.jnes.component.CPU;
 import org.jnes.component.Controller;
-import org.jnes.component.impl.CPUImpl;
+import org.jnes.component.impl.APUImpl;
 import org.jnes.component.impl.ControllerImpl;
 import org.jnes.component.impl.Emu6502;
 import org.jnes.component.impl.PPUImpl;
@@ -59,9 +59,12 @@ public class Jnes extends JComponent {
 	
 	/** display */
 	private ScaledScreen screen;
+	
+	/** sound */
+	private Sound sound;
 
 	/** time of the last call to runForABit, in ms */
-	private long last;
+	private long next;
 	
 	/** time between two frames, in ms */
 	private long frameDuration;
@@ -170,6 +173,7 @@ public class Jnes extends JComponent {
 
 	CPU cpu;
 	PPUImpl ppu;
+	APUImpl apu;
 
 	public void setup(int scaleFactor)
 			throws IOException, LineUnavailableException, InstantiationException,
@@ -180,22 +184,27 @@ public class Jnes extends JComponent {
 		final Mapper m = new DebugMapper(new NESFileLoader().load(is));
 		is.close();
 
-		cpu = new CPUImpl();
+		cpu = new Emu6502();
+//		cpu = new CPUImpl();
+		apu = new APUImpl();
 		ppu = new PPUImpl();
 		Controller controller = new ControllerImpl();
-		NESSystem system = new NESSystemImpl(cpu,ppu,controller);
+
+		NESSystem system = new NESSystemImpl(cpu,apu,ppu,controller);
 		m.setCPU(cpu);
 		m.setPPU(ppu);
 		system.setMapper(m);
 		m.setSystem(system);
+		
 		emulator = new Emulator(m,cpu,ppu);
+		sound = new Sound(apu);
 		input = new Input(controller);
 
 		screen = new ScaledScreen(ppu,scaleFactor);	
 		screen.setScaleFactor(scaleFactor);
 		add(screen);
 
-		last = getTime();
+		next = getTime();
 		/*
 		new Timer().schedule(new TimerTask() {
 			public void run() {
@@ -206,8 +215,13 @@ public class Jnes extends JComponent {
 		new Thread(new Runnable() {
 			public void run() {
 				while (true) {
-					emulator.runForOneScreen();
-					screen.repaint();
+					long now = getTime();
+					if (now>next) {
+						emulator.runForOneScreen();
+						screen.repaint();
+						sound.update();
+						next += 1000000/60;
+					}
 					Thread.yield();
 				}
 			}
@@ -220,7 +234,7 @@ public class Jnes extends JComponent {
 	private boolean paused = false;
 	public void pause() {
 		paused = !paused;
-		last = getTime();
+		next = getTime();
 	}
 	
 	
@@ -232,23 +246,6 @@ public class Jnes extends JComponent {
 	 */
 	public void setFrameSkip(int n) {
 		// TODO implements adjustable frame skip
-	}
-
-	private void runOneFrame() {
-		boolean paint = false;
-		if (!paused) {
-			long now = getTime();
-			while (last<now) {
-				emulator.runForOneScreen();
-				last += 1000000/60;
-				paint = true;
-			}
-		} else {
-			paint = true;
-		}
-		if (paint) {
-			screen.repaint();
-		}
 	}
 
 	private long getTime() {

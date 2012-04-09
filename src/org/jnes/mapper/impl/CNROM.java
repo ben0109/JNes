@@ -37,6 +37,7 @@ public class CNROM extends AbstractMapper {
 		}
 
 		mapPPU(0x0000,0x2000,this.vromBanks[0]);
+		setHorizontalMirroring();
 	}
 	
 	private void registerWrite(int value) {

@@ -13,5 +13,7 @@ public class NROM extends AbstractMapper {
 
 		// one 8kb vrom bank
 		mapPPU(0x0000,0x2000,new RomChunk(vromBanks[0]));
+		
+		setVerticalMirroring();
 	}
 }

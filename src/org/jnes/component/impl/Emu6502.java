@@ -1588,7 +1588,7 @@ public class Emu6502 implements CPU
 
 		while (clock<clockEnd) {
 			PC &= 0xffff;
-			System.out.printf("%04x\n", PC);
+//			System.out.printf("%04x\n", PC);
 			executeInstruction();
 		}
 		
