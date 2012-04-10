@@ -20,7 +20,9 @@ public class Emulator {
 	public void runForOneLine() {
 //		System.out.println("line");
 		clock += CYCLES_HBLANK+cpu.run(3*CYCLES_HBLANK/3);
-		mapper.endLine(ppu.getLineNumber());
+		if (mapper.endLine(ppu.getLineNumber())) {
+			cpu.irq();
+		}
 		ppu.endLine();
 	}
 	

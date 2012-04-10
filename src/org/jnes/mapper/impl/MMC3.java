@@ -173,17 +173,18 @@ public class MMC3 extends AbstractMapper {
 	}
 
 	@Override
-	public void endLine(int lineNumber) {
+	public boolean endLine(int lineNumber) {
 		if (lineNumber<240) {
 			irqCounter--;
 			if (irqCounter<0) {
 				irqCounter = irqLatch;
 				irqLatched = false;
-				if (!disableIrq) {
-					cpu.irq();
-				}
 				counterLatched = false;
+				if (!disableIrq) {
+					return true;
+				}
 			}
 		}
+		return false;
 	}
 }

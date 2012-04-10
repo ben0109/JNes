@@ -191,8 +191,6 @@ public class Jnes extends JComponent {
 		Controller controller = new ControllerImpl();
 
 		NESSystem system = new NESSystemImpl(cpu,apu,ppu,controller);
-		m.setCPU(cpu);
-		m.setPPU(ppu);
 		system.setMapper(m);
 		m.setSystem(system);
 		

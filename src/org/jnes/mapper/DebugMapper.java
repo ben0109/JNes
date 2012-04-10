@@ -5,13 +5,12 @@ import java.util.Set;
 
 import org.jnes.Log;
 import org.jnes.NESSystem;
-import org.jnes.component.CPU;
-import org.jnes.component.PPU;
 
 public class DebugMapper implements Mapper {
 	
 	private Log logger = new Log();
 	private Mapper mapper;
+
 	private Set<Integer> tracedAddresses = new HashSet<Integer>();
 
 	public DebugMapper(Mapper mapper) {
@@ -62,16 +61,12 @@ public class DebugMapper implements Mapper {
 		return mapper.ppuWrite(address, value&0xff);
 	}
 
-	public void setCPU(CPU cpu) {
-		mapper.setCPU(cpu);
+	public boolean endLine(int lineNumber) {
+		return mapper.endLine(lineNumber);
 	}
-
-	public void setPPU(PPU ppu) {
-		mapper.setPPU(ppu);
-	}
-
-	public void endLine(int lineNumber) {
-		mapper.endLine(lineNumber);
+	
+	public void setMirroring(Mirroring mirroring) {
+		mapper.setMirroring(mirroring);
 	}
 
 	public void setSystem(NESSystem system) {

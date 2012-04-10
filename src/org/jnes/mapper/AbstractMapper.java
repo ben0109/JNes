@@ -2,8 +2,6 @@ package org.jnes.mapper;
 
 import org.jnes.Log;
 import org.jnes.NESSystem;
-import org.jnes.component.CPU;
-import org.jnes.component.PPU;
 
 /**
  * CPU and PPU memories are mapped in chunks of 0x400 bytes (1kB).
@@ -85,10 +83,6 @@ public abstract class AbstractMapper implements Mapper {
 		}
 	}
 	
-	protected CPU cpu;
-	
-	protected PPU ppu;
-	
 	protected NESSystem system;
 	
 	protected Chunk[] cpuChunks = new Chunk[0x40];
@@ -109,6 +103,15 @@ public abstract class AbstractMapper implements Mapper {
 		setHorizontalMirroring();
 	}
 	
+	@Override
+	public void setMirroring(Mirroring mirroring) {
+		switch (mirroring) {
+		case Vertical: setVerticalMirroring(); break;
+		case Horizontal: setHorizontalMirroring(); break;
+		case FourScreen: setNoMirroring(); break;
+		}		
+	}
+	
 	protected void setNoMirroring() {
 		mirroringSource = 0x000;
 	}
@@ -119,14 +122,6 @@ public abstract class AbstractMapper implements Mapper {
 	
 	protected void setVerticalMirroring() {
 		mirroringSource = 0x400;
-	}
-
-	public void setCPU(CPU cpu) {
-		this.cpu = cpu;
-	}
-
-	public void setPPU(PPU ppu) {
-		this.ppu = ppu;
 	}
 
 	public NESSystem getSystem() {
@@ -162,8 +157,9 @@ public abstract class AbstractMapper implements Mapper {
 		return (address&mirroringSource)!=0 ? Mapper.CIRAM_A10 : 0;
 	}
 	
-	public void endLine(int lineNumber) {
+	public boolean endLine(int lineNumber) {
 		// nothing
+		return false;
 	}
 	
 	protected void mapCPU(int address, int length, Chunk chunk) {

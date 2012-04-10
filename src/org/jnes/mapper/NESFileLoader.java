@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jnes.Log;
+import org.jnes.mapper.Mapper.Mirroring;
 
 
 public class NESFileLoader {
@@ -121,6 +122,8 @@ public class NESFileLoader {
 		int nbRamBanks = header[8]&0xff;
 		//boolean pal = ((header[9]&1) != 0);
 		
+		int mirroring = flags1&1;
+		
 		int mapperType = (flags1>>4) | (flags2&0xF0);
 		Class<? extends Mapper> mapperClass = mapperClasses.get(mapperType);
 		if (mapperClass==null) {
@@ -136,7 +139,9 @@ public class NESFileLoader {
 		for (int k=0; k<nbVRomBanks; k++)
 			vromBanks[k] = read(i,0x2000);
 
-		return instantiateMapper(mapperClass, romBanks, nbRamBanks, vromBanks);
+		Mapper mapper = instantiateMapper(mapperClass, romBanks, nbRamBanks, vromBanks);
+		mapper.setMirroring(mirroring==0 ? Mirroring.Horizontal : Mirroring.Vertical);
+		return mapper;
 	}
 	
 	private Mapper instantiateMapper(Class<? extends Mapper> type,byte[][] romBanks, int nbRamBanks, byte[][] vromBanks)
