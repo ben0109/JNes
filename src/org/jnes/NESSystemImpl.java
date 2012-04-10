@@ -43,9 +43,15 @@ public class NESSystemImpl implements NESSystem {
 		switch (address&0xe000) {
 		case 0x0000: return ram[address&0x7ff]&0xff;
 		case 0x2000: return ppu.readRegister(address);
-		case 0x4000:
-		case 0x6000: return ioRead(address);
-		default: return mapper.cpuRead(address);
+		default:
+			switch (address) {
+			case 0x4016:
+				return controller.read4016();
+			case 0x4017:
+				return controller.read4017();
+			default:
+				return mapper.cpuRead(address);
+			}			
 		}		
 	}
 
@@ -55,9 +61,12 @@ public class NESSystemImpl implements NESSystem {
 		switch (address&0xe000) {
 		case 0x0000: ram[address&0x7ff] = (byte)value; break;
 		case 0x2000: ppu.writeRegister(address, value); break;
-		case 0x4000:
-		case 0x6000: ioWrite(address, value); break;
-		default: mapper.cpuWrite(address, value); break;
+		default:
+			if (address>=0x4000 && address<=0x4017) {
+				ioWrite(address, value);
+			}
+			mapper.cpuWrite(address, value);
+			break;
 		}
 	}
 
@@ -112,47 +121,43 @@ public class NESSystemImpl implements NESSystem {
 	
 	public void ioWrite(int address, int value)
 	{
-		if (address>=0x2000 && address<0x4000) {
-			ppu.writeRegister(address&7,value);
-		} else {
-			switch (address) {
-			case 0x4000:
-			case 0x4001:
-			case 0x4002:
-			case 0x4003:
-			case 0x4004:
-			case 0x4005:
-			case 0x4006:
-			case 0x4007:
-			case 0x4008:
-			case 0x4009:
-			case 0x400a:
-			case 0x400b:
-			case 0x400c:
-			case 0x400d:
-			case 0x400e:
-			case 0x400f:
-			case 0x4010:
-			case 0x4011:
-			case 0x4012:
-			case 0x4013:
-			case 0x4015:
-			case 0x4017:
-				apu.writeRegister(address, value);
-				break;
-			case 0x4014:
-				address = value*0x100;
-				for (int i=0; i<0x100; i++) {
-					ppu.writeRegister(0x2004, cpuRead(address++));
-				}
-				break;
-			case 0x4016:
-	//			System.out.printf("%04x : %04x<-%02x\n",cpu.pc,address,value);
-				controller.write4016(value);
-				break;
-			default:
-				break;
+		switch (address) {
+		case 0x4000:
+		case 0x4001:
+		case 0x4002:
+		case 0x4003:
+		case 0x4004:
+		case 0x4005:
+		case 0x4006:
+		case 0x4007:
+		case 0x4008:
+		case 0x4009:
+		case 0x400a:
+		case 0x400b:
+		case 0x400c:
+		case 0x400d:
+		case 0x400e:
+		case 0x400f:
+		case 0x4010:
+		case 0x4011:
+		case 0x4012:
+		case 0x4013:
+		case 0x4015:
+		case 0x4017:
+			apu.writeRegister(address, value);
+			break;
+		case 0x4014:
+			address = value*0x100;
+			for (int i=0; i<0x100; i++) {
+				ppu.writeRegister(0x2004, cpuRead(address++));
 			}
+			break;
+		case 0x4016:
+//			System.out.printf("%04x : %04x<-%02x\n",cpu.pc,address,value);
+			controller.write4016(value);
+			break;
+		default:
+			break;
 		}
 	}
 }
